@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+    container_name: penguin-api
+    ports:
+      - "8989:8989"
+
+  loadtester:
+    build:
+      context: ./loadtester
+    container_name: penguin-loadtester
+    environment:
+      - API_URL=http://api:8989/predict
+    depends_on:
+      - api

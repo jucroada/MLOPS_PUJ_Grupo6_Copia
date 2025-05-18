@@ -1,0 +1,42 @@
+# Ignorar el entorno virtual
+venv/
+taller_argo/venv/
+# O, si tu entorno virtual tiene otro nombre:
+env/
+
+# Archivos y carpetas de Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+taller_argo/api/__pycache__/
+
+# Otros archivos que podrías querer ignorar
+.DS_Store
+*.log
+
+# logs 
+taller_airflow/logs/scheduler/
+taller_mlflow/minio/
+taller_mlflow/JupyterLab/.ipynb_checkpoints/
+taller_mlflow/minio/mlflows3/
+taller_airflow_bu/
+Proyectos/Proyecto3/logs/
+
+#   carpetas julio
+taller_mlflow_bu/
+taller_dockerNetwork_bu/
+Proyectos/Proyecto2/jupyterlab/
+Proyectos/Proyecto3_bu/
+"Proyectos/Proyecto2/Puerto 80 Cerrado.png"
+taller_locust_bu/
+taller_k8s_bu/
+taller_observabilidad_bu/
+taller_mlflow/minio/.minio.sys/
+pytest_bu/
+
+
+
