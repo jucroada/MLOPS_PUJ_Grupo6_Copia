@@ -70,3 +70,4 @@ jobs:
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git commit -am "Update image tag to ${{ steps.version.outputs.tag }}" || echo "No changes"
           git push origin main
+      
