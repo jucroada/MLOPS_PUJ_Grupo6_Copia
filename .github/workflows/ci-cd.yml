@@ -23,6 +23,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Verify Git repository
         run: |
           git status || { echo "Not a git repository"; exit 1; }
@@ -37,13 +42,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          echo "https://${{ secrets.GH_PUSH_TOKEN }}:@github.com" > ~/.git-credentials
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PUSH_TOKEN }}@github.com/${{ github.repository }}
           git config credential.helper store
-
-      - name: Checkout repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Configura Python
         uses: actions/setup-python@v4
