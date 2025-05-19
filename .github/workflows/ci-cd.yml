@@ -59,7 +59,7 @@ jobs:
       - name: Actualiza api-deployment.yaml con nueva imagen
         working-directory: taller_argo/manifests
         run: |
-          sed -i "s|${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:.*|${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}|" api-deployment.yaml
+          sed -i "s|image: .*penguin-api:.*|image: ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}|" api-deployment.yaml
 
       - name: Commit y push del manifiesto actualizado
         env:
@@ -70,4 +70,4 @@ jobs:
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git commit -am "Update image tag to ${{ steps.version.outputs.tag }}" || echo "No changes"
           git push origin main
-      
+

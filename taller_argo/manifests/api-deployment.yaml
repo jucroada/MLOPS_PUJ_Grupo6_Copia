@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: blutenherz/penguin-api:v_fix
+          image: blutenherz/penguin-api:v3
           ports:
             - containerPort: 8989
           readinessProbe:
