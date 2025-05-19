@@ -55,3 +55,4 @@ def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 # Trigger
 # otro trigger
+# otro trigger
