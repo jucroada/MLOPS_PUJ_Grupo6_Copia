@@ -87,6 +87,8 @@ Una vez levantado el servidor, se puede acceder a la documentación interactiva 
 http://localhost:8000/docs
 ```
 
+![Acceso a la API local](images/localhost-uvicorn.png)
+
 ---
 
 ## Paso 2: Construcción de la imagen Docker de la API
@@ -105,6 +107,8 @@ Accede nuevamente desde el navegador a:
 ```
 http://localhost:8989/docs
 ```
+
+![API desplegada con Docker](images/api-docker.png)
 
 Finalmente, puedes eliminar la imagen y el contenedor para limpiar el entorno:
 
@@ -130,7 +134,7 @@ Para detener y eliminar los contenedores junto con las imágenes creadas:
 docker compose down --rmi all
 ```
 
-Este paso permite verificar que la API es capaz de manejar tráfico y que la estructura de logs y respuestas funciona correctamente.
+![Carga del LoadTester](images/loadtester_compose.png)
 
 ---
 
@@ -148,7 +152,7 @@ docker push usuario/penguin-api:v1
 docker push usuario/penguin-loadtester:v1
 ```
 
-Este paso puede repetirse cada vez que se introduzcan mejoras o ajustes al código de la API o el LoadTester, generando nuevas versiones.
+![Imágenes en Docker Hub](images/dockerhub-penguinApi.png)
 
 ---
 
@@ -157,11 +161,6 @@ Este paso puede repetirse cada vez que se introduzcan mejoras o ajustes al códi
 Activado el entorno Kubernetes (por ejemplo desde Docker Desktop), se procede a desplegar los componentes como pods y servicios. Esto se hace mediante archivos YAML que describen los recursos.
 
 ```bash
-kubectl apply -f manifests/api-deployment.yaml
-kubectl apply -f manifests/script-deployment.yaml
-kubectl apply -f manifests/prometheus-deployment.yaml
-kubectl apply -f manifests/grafana-deployment.yaml
-
 kubectl apply -k manifests/
 ```
 
@@ -181,6 +180,10 @@ kubectl port-forward svc/prometheus 9090:9090
 kubectl port-forward svc/grafana 3000:3000
 ```
 
+![Prometheus operativo](images/prometheus.png)
+
+![Dashboard en Grafana](images/grafana.png)
+
 ---
 
 ## Paso 6: Automatización con Argo CD
@@ -199,20 +202,31 @@ Aplica tu definición de aplicación:
 kubectl apply -f argo-cd/app.yaml -n argocd
 ```
 
-Y accede a la interfaz con:
+Accede a la interfaz con:
 
 ```bash
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 
+![Interfaz de Argo CD](images/argo-ui.png)
+
 Obtén la contraseña inicial con:
+
+### En Windows (PowerShell):
 
 ```powershell
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
 [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("<output>"))
 ```
 
+### En Linux o WSL:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+```
+
 ---
+
 
 ## Paso 7: Pipeline CI/CD con GitHub Actions
 
@@ -230,6 +244,49 @@ Es necesario definir dos `secrets` en GitHub:
 * `DOCKER_PASSWORD`: contraseña o token de acceso
 
 ---
+
+## Paso 8: Verificación de estado y limpieza del entorno Kubernetes
+
+En caso de necesitar desmontar todos los componentes desplegados, se pueden eliminar los manifiestos ejecutando:
+
+```bash
+kubectl delete -k manifests/
+```
+
+También se pueden eliminar manifiestos uno a uno si es necesario:
+
+```bash
+kubectl delete -f manifests/api-deployment.yaml
+kubectl delete -f manifests/script-deployment.yaml
+kubectl delete -f manifests/prometheus-deployment.yaml
+kubectl delete -f manifests/grafana-deployment.yaml
+```
+
+Para verificar las últimas interacciones del LoadTester (útil para depuración y validación de tráfico generado hacia la API):
+
+```bash
+kubectl logs -l app=loadtester --tail=10 -f
+```
+
+![Loadtester Funcionando](images/last10-loadtester.png)
+
+Este comando muestra las últimas 10 líneas de log y se mantiene en espera de nuevas peticiones (modo seguimiento).
+
+---
+
+## Problemas encontrados durante el desarrollo
+
+Durante el desarrollo del proyecto se presentaron varios desafíos técnicos que obligaron a ajustes y correcciones iterativas:
+
+* Fallos intermitentes en el acceso al endpoint `/predict` cuando la API aún no estaba lista al inicio del LoadTester.
+* ConfigMap mal montados por errores en rutas o nombres de archivo.
+* Incompatibilidades entre versiones de `scikit-learn` y los formatos esperados en `model.pkl`.
+* Timeout y errores de conexión durante sincronización con Argo CD debido a imágenes con etiquetas inválidas o ausentes en Docker Hub.
+
+Estas situaciones se resolvieron implementando validaciones, corrigiendo el orden de despliegue, ajustando los volúmenes montados y asegurando que los manifiestos estuvieran correctamente versionados y alineados con el pipeline CI/CD.
+
+---
+
 
 ## Datos de Prueba
 
@@ -256,3 +313,33 @@ Puedes probar el endpoint `/predict` con ejemplos como:
 ---
 
 Este flujo completo permite validar el ciclo de vida de un modelo de machine learning en producción, incluyendo entrenamiento, despliegue, monitoreo, automatización de versiones y actualización continua declarativa basada en Git.
+
+---
+
+## Lecciones Aprendidas
+
+El desarrollo de este taller permitió consolidar una visión práctica de los principios y herramientas clave en un flujo MLOps moderno. A través del proceso se obtuvieron las siguientes lecciones:
+
+* **Automatizar el entrenamiento y el empaquetado del modelo** permite reducir errores manuales y facilita la trazabilidad de versiones en producción.
+* **Docker y Kubernetes** son herramientas fundamentales para garantizar portabilidad, escalabilidad y aislamiento en servicios de machine learning.
+* La incorporación de **observabilidad con Prometheus y Grafana** proporciona métricas valiosas para monitorear el uso de la API y la estabilidad del entorno.
+* **Argo CD** representa una solución eficaz para aplicar GitOps en entornos reales, donde se requiere que el clúster refleje fielmente el estado declarado en un repositorio.
+* El uso de **GitHub Actions** como orquestador de CI/CD simplifica la integración continua en entornos con múltiples versiones y múltiples pasos.
+
+Este ejercicio también evidenció la importancia de una buena organización de carpetas, la necesidad de manejo explícito de errores, y la conveniencia de mantener una estructura declarativa y versionada de todos los recursos.
+
+---
+
+## Conclusión
+
+Este proyecto entrega un entorno funcional completo de MLOps, integrando entrenamiento, versionamiento, empaquetamiento, despliegue automatizado, monitoreo y sincronización continua. El flujo cubre desde el desarrollo local hasta un despliegue automatizado en clúster Kubernetes, utilizando prácticas modernas y herramientas ampliamente utilizadas en la industria.
+
+La secuencia de pasos implementada no solo valida el funcionamiento del modelo, sino también su despliegue confiable y su capacidad de monitoreo, ofreciendo una base sólida para expandir hacia flujos más complejos o entornos reales de producción.
+
+Este taller demuestra que, con una arquitectura modular y herramientas correctamente integradas, es posible construir entornos reproducibles, auditables y mantenibles, alineados con las mejores prácticas de MLOps y DevOps.
+
+---
+
+
+
+
