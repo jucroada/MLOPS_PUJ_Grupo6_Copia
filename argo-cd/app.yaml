@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mlops-taller-argo
+  namespace: argocd  # Namespace donde está corriendo Argo CD
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/jucroada/MLOPS_PUJ_Grupo6_Copia.git
+    targetRevision: main
+    path: taller_argo/manifests
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default  # O el namespace donde estás desplegando tus servicios
+
+  syncPolicy:
+    automated:
+      prune: true        # Elimina recursos que ya no están en Git
+      selfHeal: true     # Repara si hay drift entre Git y clúster
+    syncOptions:
+      - CreateNamespace=true

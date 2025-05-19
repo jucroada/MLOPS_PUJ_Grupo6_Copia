@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: loadtester
-          image: blutenherz/penguin-loadtester:v1
+          image: blutenherz/penguin-loadtester:v2
           env:
             - name: API_URL
               value: "http://api:8989/predict"

@@ -39,12 +39,14 @@ class PenguinInput(BaseModel):
 
 # Endpoint de predicción
 @app.post("/predict")
-@PREDICTION_LATENCY.time()  # mide duración automáticamente
 async def predict(penguin: PenguinInput):
     PREDICTION_COUNTER.inc()
+    start_time = time.time()
     data = np.array([[penguin.bill_length_mm, penguin.bill_depth_mm,
                       penguin.flipper_length_mm, penguin.body_mass_g]])
     prediction_index = model.predict(data)[0]
+    latency = time.time() - start_time
+    PREDICTION_LATENCY.observe(latency)
     return {"prediction": species_names[int(prediction_index)]}
 
 # Endpoint de métricas
