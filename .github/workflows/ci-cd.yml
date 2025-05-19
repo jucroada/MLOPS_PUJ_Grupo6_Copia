@@ -61,9 +61,12 @@ jobs:
         run: |
           sed -i "s|${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:.*|${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.tag }}|" api-deployment.yaml
 
-      - name: Commit si se actualizó api-deployment.yaml
+      - name: Commit y push del manifiesto actualizado
+        env:
+          TOKEN: ${{ secrets.GH_PUSH_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git commit -am "Update image tag to ${{ steps.version.outputs.tag }}" || echo "No changes"
-          git push
+          git push origin main
