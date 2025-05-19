@@ -242,6 +242,9 @@ Es necesario definir dos `secrets` en GitHub:
 
 * `DOCKER_USERNAME`: usuario de Docker Hub
 * `DOCKER_PASSWORD`: contraseña o token de acceso
+* `GH_PUSH_TOKEN`: token de GitHub para que Actions pueda acceder y sobreescribir el procedimiento.
+
+![Git Actions](images/GitActions.png)
 
 ---
 
@@ -286,6 +289,7 @@ Durante el desarrollo del proyecto se presentaron varios desafíos técnicos que
 Estas situaciones se resolvieron implementando validaciones, corrigiendo el orden de despliegue, ajustando los volúmenes montados y asegurando que los manifiestos estuvieran correctamente versionados y alineados con el pipeline CI/CD.
 
 ---
+
 
 
 ## Datos de Prueba
