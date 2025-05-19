@@ -23,6 +23,16 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Verify Git repository
+        run: |
+          git status || { echo "Not a git repository"; exit 1; }
+
+      - name: Debug Git repository
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -la
+          git rev-parse --show-toplevel || echo "Not in a git repository"
+
       - name: Set up Git credentials
         run: |
           git config user.name "github-actions[bot]"
@@ -32,6 +42,8 @@ jobs:
 
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Configura Python
         uses: actions/setup-python@v4
@@ -79,7 +91,6 @@ jobs:
           git config --global user.email "actions@github.com"
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git add taller_argo/manifests/api-deployment.yaml
-          git status
           git commit -m "Update image tag to ${{ steps.version.outputs.tag }}" || echo "No changes to commit"
           git push origin main || { echo "Push failed"; exit 1; }
 
