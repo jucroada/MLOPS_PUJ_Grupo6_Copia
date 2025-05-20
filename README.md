@@ -80,6 +80,16 @@ pip install -r requirements.txt
 python train_model.py
 uvicorn app.main:app --reload
 ```
+Análogo en Ubuntu
+```bash
+cd taller_argo
+python3.9 -m venv venv
+source venv/bin/activate
+cd api 
+pip install -r requirements.txt
+python train_model.py
+uvicorn app.main:app --reload
+```
 
 Una vez levantado el servidor, se puede acceder a la documentación interactiva de la API en:
 
@@ -290,7 +300,54 @@ Estas situaciones se resolvieron implementando validaciones, corrigiendo el orde
 
 ---
 
+## Para Iniciar el Experimento en la VM
 
+Iniciamos la máquina virtual, y descargamos la actualización del experimento a traves de GitHub. Luego de hacer esto, dentro del directorio de desarrollo del taller hacemos lo siguiente:
+
+```bash
+minikube delete  # En caso de que se encuentre apagado Minikube
+minikube start --driver=docker --cpus=4 --memory=8192 --addons=default-storageclass
+```
+
+Para saber con mayor claridad los recursos con los que contamos para el levantamiento, usamos los siguientes comandos:
+
+```bash
+free -h
+nproc
+```
+
+Comprobamos el estado de `minikube`
+
+```bash
+kubectl get nodes
+kubectl get pods -A
+```
+
+Arrancamos ArgoCD (si existe problemas por el firewall se puede descargar el archivo autogenerado e instalarlo manualmente).
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Verificamos que actualmente se encuentre los pods de Argo CD estable.
+
+```bash
+kubectl get pods -n argocd
+```
+
+Activamos los manifiestos vía Argo CD.
+
+```bash
+kubectl apply -f argo-cd/app.yaml
+```
+
+Se utiliza port-forward para acceder a Argo CD.
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d # obtención de la clave en ubuntu
+```
 
 ## Datos de Prueba
 
